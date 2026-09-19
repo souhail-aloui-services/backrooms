@@ -184,5 +184,44 @@
 
   <script type="importmap">{ "imports": { "three": "./vendor/three.module.js" } }</script>
   <script type="module" src="./src/main.js"></script>
+  <!-- جوستيك التيليفون - زيدو هنا -->
+<div id="joy" style="position:fixed;left:20px;bottom:20px;width:120px;height:120px;background:rgba(255,255,255,0.15);border-radius:50%;z-index:100;touch-action:none"><div id="stick" style="position:absolute;left:35px;top:35px;width:50px;height:50px;background:rgba(255,255,255,0.6);border-radius:50%"></div></div>
+<div id="lookArea" style="position:fixed;right:0;top:0;width:50%;height:100%;z-index:90;touch-action:none"></div>
+<div style="position:fixed;right:20px;top:20px;z-index:100"><button id="run" style="padding:12px">🏃</button> <button id="flash" style="padding:12px">🔦</button></div>
+
+<script>
+const joy=document.getElementById('joy'),stick=document.getElementById('stick'),lookArea=document.getElementById('lookArea');
+let sx=0,sy=0;
+function setKey(code,down){window.dispatchEvent(new KeyboardEvent(down?'keydown':'keyup',{code:code,bubbles:true}))}
+joy.addEventListener('touchmove',e=>{
+  e.preventDefault();
+  let r=joy.getBoundingClientRect();
+  let x=e.touches[0].clientX-r.left-60;
+  let y=e.touches[0].clientY-r.top-60;
+  let d=Math.min(50,Math.hypot(x,y)),a=Math.atan2(y,x);
+  let nx=Math.cos(a)*d, ny=Math.sin(a)*d;
+  stick.style.left=35+nx+'px'; stick.style.top=35+ny+'px';
+  setKey('KeyW',ny<-15); setKey('KeyS',ny>15);
+  setKey('KeyA',nx<-15); setKey('KeyD',nx>15);
+},{passive:false});
+joy.addEventListener('touchend',()=>{
+  stick.style.left='35px';stick.style.top='35px';
+  ['KeyW','KeyS','KeyA','KeyD'].forEach(c=>setKey(c,false));
+});
+let lx=0,ly=0;
+lookArea.addEventListener('touchmove',e=>{
+  e.preventDefault();
+  let x=e.touches[0].clientX, y=e.touches[0].clientY;
+  if(lx){
+    let dx=x-lx, dy=y-ly;
+    window.dispatchEvent(new MouseEvent('mousemove',{movementX:dx*2,movementY:dy*2,bubbles:true}));
+  }
+  lx=x; ly=y;
+},{passive:false});
+lookArea.addEventListener('touchend',()=>{lx=0;ly=0});
+document.getElementById('run').addEventListener('touchstart',()=>setKey('ShiftLeft',true));
+document.getElementById('run').addEventListener('touchend',()=>setKey('ShiftLeft',false));
+document.getElementById('flash').addEventListener('touchstart',()=>setKey('KeyC',true));
+</script>
 </body>
 </html>
